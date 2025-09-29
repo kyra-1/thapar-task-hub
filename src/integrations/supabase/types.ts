@@ -50,12 +50,26 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reviews_reviewee_id_fkey"
+            columns: ["reviewee_id"]
+            isOneToOne: false
+            referencedRelation: "user_ratings"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "user_ratings"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "reviews_task_id_fkey"
@@ -103,6 +117,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "task_assignments_tasker_id_fkey"
+            columns: ["tasker_id"]
+            isOneToOne: false
+            referencedRelation: "user_ratings"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       tasks: {
@@ -144,6 +165,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tasks_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: false
+            referencedRelation: "user_ratings"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       transactions: {
@@ -176,6 +204,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_ratings"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       users: {
@@ -185,6 +220,7 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          phone: string | null
           role: string | null
         }
         Insert: {
@@ -193,6 +229,7 @@ export type Database = {
           created_at?: string | null
           id: string
           name: string
+          phone?: string | null
           role?: string | null
         }
         Update: {
@@ -201,6 +238,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          phone?: string | null
           role?: string | null
         }
         Relationships: []
@@ -213,6 +251,15 @@ export type Database = {
           review_count: number | null
           user_id: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_reviewee_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

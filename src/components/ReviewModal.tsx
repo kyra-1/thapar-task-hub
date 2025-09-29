@@ -28,21 +28,28 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ open, onOpenChange, taskId, r
       return;
     }
     setLoading(true);
-
     try {
-      const { error } = await supabase.from('reviews').insert({
-        task_id: taskId,
-        reviewer_id: reviewerId,
-        reviewee_id: revieweeId,
-        rating: rating,
-        comment: comment,
-      });
+      // get current auth user id to satisfy RLS check
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      const reviewerIdFromAuth = userData?.user?.id;
+      if (!reviewerIdFromAuth) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('reviews')
+        .insert({
+          task_id: taskId,
+          reviewer_id: reviewerIdFromAuth,
+          reviewee_id: revieweeId,
+          rating,
+          comment: comment || null,
+        });
 
       if (error) throw error;
 
       toast({ title: 'Review Submitted!', description: 'Thank you for your feedback.' });
       onReviewSubmitted();
-    } catch (error) {
+      onOpenChange(false); // close modal immediately after success
+    } catch (err: any) {
       toast({ title: 'Error', description: 'Failed to submit review.', variant: 'destructive' });
     } finally {
       setLoading(false);
