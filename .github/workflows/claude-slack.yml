@@ -1,0 +1,52 @@
+name: Claude Slack Assistant
+
+on:
+  repository_dispatch:
+    types: [claude_query]
+
+jobs:
+
+  ask-claude:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Claude CLI
+        run: |
+          npm install -g @anthropic-ai/claude-cli
+
+      - name: Ask Claude
+        id: ask
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+
+          QUESTION='${{ github.event.client_payload.question }}'
+
+          RESULT=$(claude ask "$QUESTION")
+
+          echo "answer<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESULT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Send Slack Reply
+        run: |
+
+          curl -X POST https://slack.com/api/chat.postMessage \
+          -H "Authorization: Bearer ${{ secrets.SLACK_BOT_TOKEN }}" \
+          -H "Content-type: application/json" \
+          --data "{
+          \"channel\":\"${{ github.event.client_payload.channel }}\",
+          \"text\":\"${{ steps.ask.outputs.answer }}\"
+          }"
